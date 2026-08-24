@@ -28,15 +28,17 @@
   "shortcuts": [
     {
       "name": "Mes demandes",
-      "short_name": "Demandes",
       "url": "/#/demandes",
-      "chosenIconUrl": "https://admin.locweb.fr/icone-512.png"
+      "chosenIconUrl": "https://admin.locweb.fr/icone-512.png",
+      "shortName": "Demandes",
+      "chosenMaskableIconUrl": "https://admin.locweb.fr/icone-maskable-512.png"
     },
     {
       "name": "Mon site",
-      "short_name": "Mon site",
       "url": "/#/mon-site",
-      "chosenIconUrl": "https://admin.locweb.fr/icone-512.png"
+      "chosenIconUrl": "https://admin.locweb.fr/icone-512.png",
+      "shortName": "Mon site",
+      "chosenMaskableIconUrl": "https://admin.locweb.fr/icone-maskable-512.png"
     }
   ],
   "generatorApp": "bubblewrap-cli",

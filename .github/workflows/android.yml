@@ -99,7 +99,7 @@ jobs:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.CLE_ANDROID_MDP }}
           BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.CLE_ANDROID_MDP }}
         run: |
-          yes | bubblewrap update --skipVersionUpgrade
+          yes 2>/dev/null | bubblewrap update --skipVersionUpgrade
           bubblewrap build --skipPwaValidation
 
       - name: Rassembler les fichiers
