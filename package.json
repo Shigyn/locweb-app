@@ -1,0 +1,13 @@
+{
+  "name": "locweb-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Mon espace LocWeb, empaquete pour Windows, Linux et Android.",
+  "scripts": {
+    "icones": "tauri icon icone-source.png",
+    "bureau": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

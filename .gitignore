@@ -1,0 +1,21 @@
+node_modules/
+src-tauri/target/
+src-tauri/gen/
+
+# La cle de signature Android et tout ce qui en derive ne doivent
+# jamais entrer dans un depot, meme prive : elle vit dans
+# ../cles-android/ et se transmet a la construction par un secret.
+*.p12
+*.keystore
+*.jks
+android/app/
+android/*.apk
+android/*.aab
+android/build/
+android/.gradle/
+android/gradle*
+android/*.gradle
+android/*.iml
+android/store_icon.png
+android/local.properties
+*.base64

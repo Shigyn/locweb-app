@@ -1,0 +1,23 @@
+[package]
+name = "locweb-espace"
+version = "1.0.0"
+description = "Mon espace LocWeb"
+authors = ["LocWeb"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+
+# Binaire plus petit : un client telecharge l'application sur la
+# connexion qu'il a, pas sur celle qu'on aimerait qu'il ait.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

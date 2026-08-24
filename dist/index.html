@@ -1,0 +1,38 @@
+<!doctype html>
+<!--
+  Page de secours.
+
+  L'application ouvre directement admin.locweb.fr ; cette page ne
+  s'affiche donc jamais en usage normal. Elle existe parce que Tauri
+  exige un dossier de facade pour empaqueter, et elle sert de filet si
+  l'adresse d'accueil devient injoignable au lancement.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mon espace LocWeb</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0; min-height: 100vh;
+    display: grid; place-content: center; justify-items: center;
+    gap: 1rem; padding: 2rem; text-align: center;
+    font: 400 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: #F5F3EF; color: #17171B;
+  }
+  @media (prefers-color-scheme: dark) { body { background: #17171B; color: #F5F3EF; } }
+  h1 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+  p { margin: 0; max-width: 34ch; opacity: .72; }
+  a {
+    margin-top: .5rem; padding: .7rem 1.4rem; border-radius: 8px;
+    background: #E8281E; color: #fff; text-decoration: none; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <h1>Espace momentanément injoignable</h1>
+  <p>Vérifiez votre connexion internet, puis réessayez. Vos modifications enregistrées ne sont pas perdues.</p>
+  <a href="https://admin.locweb.fr/">Réessayer</a>
+</body>
+</html>

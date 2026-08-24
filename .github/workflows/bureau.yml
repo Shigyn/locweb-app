@@ -1,0 +1,117 @@
+# ===================================================================
+#  Construit l'application de bureau pour Windows et pour Linux.
+#
+#  Pourquoi ici plutot que sur le poste de Nico : une application Linux
+#  doit etre compilee sur Linux. Depuis Windows, les paquets .deb et
+#  .AppImage ne peuvent pas etre produits. GitHub prete une machine de
+#  chaque systeme, donc les deux versions sortent du meme geste.
+#
+#  Declenchement :
+#    - un tag `v1.2.3` pousse  -> construit ET publie la version
+#    - le bouton « Run workflow » -> construit seulement, pour verifier
+# ===================================================================
+
+name: Application de bureau
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  construire:
+    name: ${{ matrix.nom }}
+    runs-on: ${{ matrix.machine }}
+    strategy:
+      # Une panne cote Linux ne doit pas annuler la construction Windows
+      # deja en cours : on veut savoir lesquelles des deux marchent.
+      fail-fast: false
+      matrix:
+        include:
+          - nom: Windows
+            machine: windows-latest
+          - nom: Linux
+            # Volontairement pas `ubuntu-latest`. Un AppImage construit
+            # sur une version recente exige une glibc recente et refuse
+            # de demarrer sur les distributions encore repandues.
+            machine: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bibliotheques systeme (Linux)
+        if: matrix.nom == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev \
+            patchelf libxdo-dev build-essential file
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # La compilation Rust est longue. Le cache la ramene de ~8 minutes
+      # a moins d'une entre deux constructions.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - name: Numero de version depuis le tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          node -e "
+            const fs = require('fs');
+            const p = 'src-tauri/tauri.conf.json';
+            const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+            c.version = process.argv[1];
+            fs.writeFileSync(p, JSON.stringify(c, null, 2) + '\n');
+          " "$version"
+          echo "Version empaquetee : $version"
+
+      - run: npx tauri build
+
+      # Les noms produits par Tauri contiennent la version et des
+      # espaces. On les renomme pour que l'adresse de telechargement
+      # reste la meme d'une version a l'autre — la page de
+      # telechargement peut ainsi pointer dessus une fois pour toutes.
+      - name: Rassembler les fichiers
+        shell: bash
+        run: |
+          mkdir -p livraison
+          cd src-tauri/target/release/bundle
+          if [ "${{ matrix.nom }}" = "Windows" ]; then
+            cp nsis/*-setup.exe "$GITHUB_WORKSPACE/livraison/LocWeb-Espace-Windows.exe"
+          else
+            cp appimage/*.AppImage "$GITHUB_WORKSPACE/livraison/LocWeb-Espace-Linux.AppImage"
+            cp deb/*.deb          "$GITHUB_WORKSPACE/livraison/LocWeb-Espace-Linux.deb"
+          fi
+          ls -lh "$GITHUB_WORKSPACE/livraison"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: locweb-espace-${{ matrix.nom }}
+          path: livraison/*
+
+      - name: Publier la version
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: livraison/*
+          name: Mon espace LocWeb ${{ github.ref_name }}
+          body: |
+            Installez l'application sur votre ordinateur.
+
+            - **Windows** : téléchargez `LocWeb-Espace-Windows.exe` et ouvrez-le.
+            - **Linux** : `LocWeb-Espace-Linux.AppImage` (rendez-le exécutable, puis lancez-le) ou `LocWeb-Espace-Linux.deb` sur Debian et Ubuntu.
+
+            Sur iPhone et iPad, l'espace s'ajoute depuis Safari : bouton Partager, puis « Sur l'écran d'accueil ».

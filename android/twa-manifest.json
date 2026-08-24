@@ -1,0 +1,56 @@
+{
+  "packageId": "fr.locweb.espace",
+  "host": "admin.locweb.fr",
+  "name": "Mon espace LocWeb",
+  "launcherName": "LocWeb",
+  "display": "standalone",
+  "orientation": "default",
+  "themeColor": "#F5F3EF",
+  "themeColorDark": "#17171B",
+  "navigationColor": "#F5F3EF",
+  "navigationColorDark": "#17171B",
+  "navigationDividerColor": "#F5F3EF",
+  "navigationDividerColorDark": "#17171B",
+  "backgroundColor": "#F5F3EF",
+  "startUrl": "/#/accueil",
+  "iconUrl": "https://admin.locweb.fr/icone-512.png",
+  "maskableIconUrl": "https://admin.locweb.fr/icone-maskable-512.png",
+  "webManifestUrl": "https://admin.locweb.fr/app.webmanifest",
+  "fullScopeUrl": "https://admin.locweb.fr/",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./locweb.p12",
+    "alias": "locweb"
+  },
+  "appVersionName": "1.0.0",
+  "appVersion": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Mes demandes",
+      "short_name": "Demandes",
+      "url": "/#/demandes",
+      "chosenIconUrl": "https://admin.locweb.fr/icone-512.png"
+    },
+    {
+      "name": "Mon site",
+      "short_name": "Mon site",
+      "url": "/#/mon-site",
+      "chosenIconUrl": "https://admin.locweb.fr/icone-512.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableNotifications": false,
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 23,
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}

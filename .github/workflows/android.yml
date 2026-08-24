@@ -1,0 +1,120 @@
+# ===================================================================
+#  Construit l'application Android (.apk).
+#
+#  Technique : TWA (Trusted Web Activity). L'application est une
+#  coquille Android qui affiche admin.locweb.fr en plein ecran, sans
+#  barre d'adresse. La disparition de la barre d'adresse depend d'un
+#  fichier publie sur le domaine — /.well-known/assetlinks.json — qui
+#  porte l'empreinte de la cle de signature ci-dessous. Si les deux ne
+#  correspondent pas, l'application fonctionne mais garde un bandeau
+#  Chrome en haut : c'est le symptome a reconnaitre.
+#
+#  Deux secrets a creer dans Settings > Secrets and variables > Actions :
+#    CLE_ANDROID_BASE64  -> contenu de cles-android/locweb.p12.base64
+#    CLE_ANDROID_MDP     -> mot de passe note dans mot-de-passe.txt
+# ===================================================================
+
+name: Application Android
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Verifier que les secrets sont en place
+        env:
+          CLE: ${{ secrets.CLE_ANDROID_BASE64 }}
+          MDP: ${{ secrets.CLE_ANDROID_MDP }}
+        run: |
+          if [ -z "$CLE" ] || [ -z "$MDP" ]; then
+            echo "::error::Les secrets CLE_ANDROID_BASE64 et CLE_ANDROID_MDP ne sont pas definis."
+            echo "Sans cle de signature, Android refuse d'installer l'application."
+            exit 1
+          fi
+
+      - name: Installer Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      # Bubblewrap cherche le JDK et le SDK a un emplacement qu'il note
+      # dans son propre fichier de configuration. Sur une machine jetable
+      # il faut le lui ecrire.
+      - name: Configurer Bubblewrap
+        run: |
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json <<FIN
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_SDK_ROOT"
+          }
+          FIN
+          cat ~/.bubblewrap/config.json
+
+      - name: Reconstituer la cle de signature
+        env:
+          CLE: ${{ secrets.CLE_ANDROID_BASE64 }}
+        run: echo "$CLE" | base64 -d > android/locweb.p12
+
+      - name: Numero de version depuis le tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          # Android refuse une mise a jour dont le code de version n'a
+          # pas augmente. Le nombre de commits fait un compteur qui ne
+          # recule jamais.
+          code=$(git rev-list --count HEAD)
+          node -e "
+            const fs = require('fs');
+            const p = 'android/twa-manifest.json';
+            const m = JSON.parse(fs.readFileSync(p, 'utf8'));
+            m.appVersionName = process.argv[1];
+            m.appVersion = process.argv[1];
+            m.appVersionCode = Number(process.argv[2]);
+            fs.writeFileSync(p, JSON.stringify(m, null, 2) + '\n');
+          " "$version" "$code"
+
+      - name: Construire l'apk
+        working-directory: android
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.CLE_ANDROID_MDP }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.CLE_ANDROID_MDP }}
+        run: |
+          yes | bubblewrap update --skipVersionUpgrade
+          bubblewrap build --skipPwaValidation
+
+      - name: Rassembler les fichiers
+        run: |
+          mkdir -p livraison
+          cp android/app-release-signed.apk livraison/LocWeb-Espace-Android.apk
+          ls -lh livraison
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: locweb-espace-Android
+          path: livraison/*
+
+      - name: Publier la version
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: livraison/*

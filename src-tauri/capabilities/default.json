@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Aucune API n'est ouverte a la page. La fenetre affiche admin.locweb.fr, qui n'a besoin de rien d'autre que du web.",
+  "windows": ["principale"],
+  "permissions": ["core:default"]
+}
