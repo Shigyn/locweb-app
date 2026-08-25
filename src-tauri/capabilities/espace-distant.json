@@ -1,0 +1,13 @@
+{
+  "identifier": "espace-distant",
+  "description": "La fenetre n'a plus de barre de titre : c'est la page qui porte la croix de fermeture, et c'est elle qu'on attrape pour deplacer la fenetre. admin.locweb.fr a donc besoin de ces trois commandes — et de rien d'autre. Aucun acces aux fichiers, au reseau local ni au shell n'est accorde ici.",
+  "windows": ["principale"],
+  "remote": {
+    "urls": ["https://admin.locweb.fr"]
+  },
+  "permissions": [
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-start-dragging"
+  ]
+}

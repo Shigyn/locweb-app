@@ -48,6 +48,12 @@ fn main() {
                 WebviewUrl::External(ACCUEIL.parse().expect("adresse d'accueil invalide")),
             )
             .title("Mon espace LocWeb")
+            // Pas de barre de titre Windows : elle affichait un bandeau
+            // gris au-dessus d'une interface qui a deja son propre
+            // entete, et ca se voyait. La page fournit a la place sa
+            // croix de fermeture et ses zones de deplacement — voir
+            // `bureau.js` dans locweb-editeur.
+            .decorations(false)
             .inner_size(1180.0, 820.0)
             // Le seuil bas correspond a la mise en page telephone de
             // l'espace : en dessous, les tableaux debordent.
